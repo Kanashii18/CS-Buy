@@ -72,6 +72,7 @@ Backend
 │   └── robots.txt
 │
 └── metadata/
+```
 
 <h2 align="center">Testing</h2>
 - I implemented **Jest** for testing
