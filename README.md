@@ -1,13 +1,12 @@
-<table>
-  <tr>
-    <td>
-      <h3>CS-Buy Page</h3>
-    </td>
-    <td>
-      <img src="https://cs-buy-api.onrender.com/assets/icons/logo.svg" alt="CS-Buy logo" width="30">
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <span style="font-size: 1.17em; font-weight: bold;">CS-Buy Page</span>
+  <img
+    src="https://cs-buy-api.onrender.com/assets/icons/logo.svg"
+    alt="CS-Buy logo"
+    width="30"
+    style="vertical-align: middle;"
+  >
+</p>
 
 ## Still in development
 
