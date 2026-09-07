@@ -1,12 +1,12 @@
-<p align="left">
-  <span style="font-size: 1.57em; font-weight: bold;">CS-Buy Page</span>
+<h2 align="center">
+  CS-Buy Page
   <img
     src="https://cs-buy-api.onrender.com/assets/icons/logo.svg"
     alt="CS-Buy logo"
     width="30"
-    style="vertical-align: middle;"
+    style="vertical-align: middle; transform: translateY(4px);"
   >
-</p>
+</h2>
 
 ## Still in development
 
