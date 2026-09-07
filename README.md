@@ -28,7 +28,7 @@
 <h2 align="center">Frameworks</h2>
 - Tailwind, Fastify, Socket.io, Jwt, Mysql12, Crypto, Typescript, Jest, Cloudinary, Stripe, Paypal
 
-<h2 align="center">Instalation and Execution </h2>
+<h2 align="center">Installation and Execution </h2>
 <ul>
   <li><code>npm run install</code></li>
   <li><code>npm run build</code></li>
@@ -52,13 +52,13 @@ Backend
 │   │   ├── chat.routes.ts       # Chat, sessions and notifications
 │   │   ├── order.routes.ts      # Orders, cancellations and order history
 │   │   ├── purchase.routes.ts   # Checkout and payments
-│   │   ├── seller.routes.ts     # Products gestion by seller 
-│   │   ├── user.routes.ts       # Login, register and alert notifications
-│   │   └── wallet.routes.ts     # Transactions, withdraw money and similar ones
+│   │   ├── seller.routes.ts     # Product management by seller 
+│   │   ├── user.routes.ts       # Login, registration and alert notifications
+│   │   └── wallet.routes.ts     # Transactions, withdrawals and similar ones
 │   │
 │   ├── scripts/
 │   │   ├── cleanup.ts           # Clean checkout every few seconds
-│   │   └── db.ts                # Module for initializate mysql12, return db and pool
+│   │   └── db.ts                # Module for initializing mysql12, return db and pool
 │   ├── config/
 │   │   ├── bcrypt.ts
 │   │   ├── env.ts
@@ -72,18 +72,16 @@ Backend
 │   └── robots.txt
 │
 └── metadata/
-```  
+
 <h2 align="center">Testing</h2>
 - I implemented **Jest** for testing
 
 <h2>Concept about the app</h2>
-- Cs-buy marketplace is c2c, i structure the proyect to be used for consumers and by consumers, i implemented chat realtime with socket.io for comunication with seller, when consumer buyer buy something, the seller need to wait for 5 days or wait for confirmation by the buyer, we implement an escrow lite to prevent scam, where money gonna wait in stripe all the time and later gonna be sended to seller wallet, app was create as an fast and optimized page, thats why i implement lazy load with next.js for not reload content when we go to other section, i gonna implement redis later for cache optimization in memory 
+- The Cs-buy marketplace is c2c, i structured the project to be used for consumers and by consumers, i implemented real-time chat with socket.io for communication with the seller, when a consumer buyer buys something, the seller needs to wait for 5 days or wait for confirmation by the buyer, we implemented an escrow lite to prevent scams, where money gonna wait in stripe all the time and later gonna be sent to seller wallet, app was created as a fast and optimized page, thats why i implemented lazy load with next.js for not reload content when we go to other section, i gonna implement redis later for cache optimization in memory
 
-##  About me 
+## About me
 
-- i've been working with the project 1 year and 5 months aprox, it started as a concept and along the way i researched to choose the best stack posibile and studied them.
-- 
-- Feel free wht asking me something, i love speak and help ^^. I’m passionate about programming. To me, it’s more than just code; it’s an art.
-
-- [mi telegram](https://t.me/Kanashii188)
-- mi discord: [kanashii18](https://www.discord.com/)
+* i’ve been working on the project 1 year and 5 months approx, it started as a concept and along the way i researched to choose the best stack possible and studied them.
+* Feel free with asking me something, i love speaking and help ^^. I’m passionate about programming. To me, it’s more than just code; it’s an art.
+* mi telegram⁠￼
+* mi discord: kanashii18⁠
