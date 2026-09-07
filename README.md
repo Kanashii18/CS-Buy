@@ -1,7 +1,13 @@
-<p align="center" style="display:flex">
-  <h3>CS-Buy Page</h3>
-  <img src="https://cs-buy-api.onrender.com/assets/icons/logo.svg" alt="Cs-Buy logo" width="50" displey="flex" justify-content="center"  style="vertical-align: middle;">
-</p>
+<table>
+  <tr>
+    <td>
+      <h3>CS-Buy Page</h3>
+    </td>
+    <td>
+      <img src="https://cs-buy-api.onrender.com/assets/icons/logo.svg" alt="CS-Buy logo" width="30">
+    </td>
+  </tr>
+</table>
 
 ## Still in development
 
