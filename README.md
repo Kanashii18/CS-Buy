@@ -1,5 +1,5 @@
 <p align="left">
-  <h2 font-weight: bold;">CS-Buy Page</h2>
+  <span style="font-size: 1.57em; font-weight: bold;">CS-Buy Page</span>
   <img
     src="https://cs-buy-api.onrender.com/assets/icons/logo.svg"
     alt="CS-Buy logo"
