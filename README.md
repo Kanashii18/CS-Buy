@@ -1,11 +1,12 @@
 <h2 align="center">
   CS-Buy Page
-  <img
-    src="https://cs-buy-api.onrender.com/assets/icons/logo.svg"
-    alt="CS-Buy logo"
-    width="30"
-    style="vertical-align: middle; transform: translateY(4px);"
-  >
+  <sub>
+    <img
+      src="https://cs-buy-api.onrender.com/assets/icons/logo.svg"
+      alt="CS-Buy logo"
+      width="30"
+    >
+  </sub>
 </h2>
 
 ## Still in development
