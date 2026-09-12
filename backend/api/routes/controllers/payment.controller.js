@@ -239,7 +239,7 @@ export function payment_Controller(db, io, users, dependencies = {}) {
                         error: error.message,
                         type: error.type,
                         code: error.code,
-                        key:stripe_secret_key,
+                        key:process.env,
                         decline_code: error.decline_code,
                         param: error.param,
 }); 
