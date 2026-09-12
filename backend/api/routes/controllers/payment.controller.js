@@ -19,7 +19,7 @@ import * as tinysecp from 'tiny-secp256k1';
 
 // ============== // Stripe Configuration // ============== // 
 import Stripe from 'stripe';
-const stripe = new Stripe(null);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // ======================================================== // 
 
 // ============== // Configuración de PayPal // ============= //
