@@ -234,9 +234,13 @@ export function payment_Controller(db, io, users, dependencies = {}) {
                     console.error(error);
 
                     return reply.code(500).send({
-                         error,
-                    });
-               }
+                        error: error.message,
+                        type: error.type,
+                        code: error.code,
+                        decline_code: error.decline_code,
+                        param: error.param,
+}); 
+                    }
           },
 
           // ============= || Stripe Status || ============ //
