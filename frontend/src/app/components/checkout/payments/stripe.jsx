@@ -152,16 +152,6 @@ export default function Head_stripe({onError, onSuccess}) {
     return (
         <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-4">
-                <div className="flex flex-col">
-                        <div className="flex w-full flex-col gap-2.5 text-white/85">
-                            <input
-                                type="text"
-                                placeholder="Nombre del titular de la tarjeta"
-                                className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
-                                name="cardHolder"
-                            />
-                        </div>
-                </div>
                 <div className="rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4">
                         <CardElement options={{ 
                             style: style
