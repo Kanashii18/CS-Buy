@@ -1,9 +1,9 @@
 import { randomUUID } from 'crypto';
-import dotenv from 'dotenv';
+//import dotenv from 'dotenv';
 import finallyOrder from './payment_success/chat.notify.db.js';
 import Order_service from './payment_success/order.db/service.db.js';
 import Order_account from './payment_success/order.db/account.db.js';
-dotenv.config();
+//dotenv.config();
 
 const Set_orders = {
      account: Order_account,
