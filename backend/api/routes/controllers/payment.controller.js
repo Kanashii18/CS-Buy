@@ -62,7 +62,7 @@ export function payment_Controller(db, io, users, dependencies = {}) {
 
           // ============= || Crypto Payment || ============ //
           crypto_payment: async (request, reply) => {
-               const litecoin_network = {
+               /**const litecoin_network = {
                     messagePrefix: '\x19Litecoin Signed Message:\n',
                     bech32: 'ltc',
                     bip32: {
@@ -91,6 +91,7 @@ export function payment_Controller(db, io, users, dependencies = {}) {
                console.log('Dirección Litecoin (Mainnet):', ltcAddress);
 
                return reply.code(200).send("OK");
+               **/
           },
 
           // ============= || PayPal Payment || ============ //
