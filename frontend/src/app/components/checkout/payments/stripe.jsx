@@ -47,15 +47,10 @@ export default function Head_stripe({onError, onSuccess}) {
         setIsProcessing(true);
 
         const cardElement = elements.getElement(CardElement);
-        const cardHolderName = event.target.cardHolder.value;
 
         const { error, paymentMethod } = await stripe.createPaymentMethod({
             type: 'card',
-            card: cardElement,
-            billing_details: {
-                name: cardHolderName,
-                email: email
-            },
+            card: cardElement
         });
 
         if (error) {
@@ -74,7 +69,6 @@ export default function Head_stripe({onError, onSuccess}) {
                 },
                 body: JSON.stringify({ 
                     payment_method: id,
-                    cardHolderName
                 }),
             })
             .then(async(r) => {
@@ -91,8 +85,7 @@ export default function Head_stripe({onError, onSuccess}) {
                     if(data.status === "requires_action" || data.status === "requires_confirmation"){
                             const { paymentIntent } = await stripe.confirmCardPayment(data.id, {
                                 payment_method: {
-                                    card: elements.getElement(CardElement),
-                                    billing_details: { name: cardHolderName, email },
+                                    card: elements.getElement(CardElement)
                                 }})
                             if(!paymentIntent) return setError("Declined Card");
                             if (paymentIntent.status === "requires_capture") {
@@ -166,17 +159,6 @@ export default function Head_stripe({onError, onSuccess}) {
                                 placeholder="Nombre del titular de la tarjeta"
                                 className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
                                 name="cardHolder"
-                            />
-                        </div>
-                </div>
-                <div className="flex flex-col">
-                        <div className="flex w-full flex-col gap-2.5 text-white/85">
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="Correo"
-                                className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
                             />
                         </div>
                 </div>
