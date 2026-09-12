@@ -19,7 +19,7 @@ import * as tinysecp from 'tiny-secp256k1';
 
 // ============== // Stripe Configuration // ============== // 
 import Stripe from 'stripe';
-const stripe_secret_key = process.env.STRIPE_SECRET_KEY;
+const stripe_secret_key = process.env.STRIPE_TOKEN;
 const stripe = new Stripe(stripe_secret_key);
 // ======================================================== // 
 
@@ -239,7 +239,6 @@ export function payment_Controller(db, io, users, dependencies = {}) {
                         error: error.message,
                         type: error.type,
                         code: error.code,
-                        key:process.env,
                         decline_code: error.decline_code,
                         param: error.param,
 }); 
