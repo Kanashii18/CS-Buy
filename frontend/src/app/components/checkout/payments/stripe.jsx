@@ -78,6 +78,7 @@ const { error, paymentMethod } = await stripe.createPaymentMethod({
                 },
                 body: JSON.stringify({ 
                     payment_method: id,
+                    radar_session: radarSession,
                 }),
             })
             .then(async(r) => {
