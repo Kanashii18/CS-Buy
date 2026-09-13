@@ -48,10 +48,19 @@ export default function Head_stripe({onError, onSuccess}) {
 
         const cardElement = elements.getElement(CardElement);
 
-        const { error, paymentMethod } = await stripe.createPaymentMethod({
-            type: 'card',
-            card: cardElement
-        });
+// CREAR RADAR SESSION
+const { radarSession, error: radarError } =
+    await stripe.createRadarSession();
+
+if (radarError) {
+    console.error("Radar Session error:", radarError);
+    return setError(radarError.message);
+}
+
+const { error, paymentMethod } = await stripe.createPaymentMethod({
+    type: 'card',
+    card: cardElement
+});
 
         if (error) {
             setError("error");
