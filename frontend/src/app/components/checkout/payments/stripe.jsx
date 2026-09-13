@@ -48,7 +48,12 @@ export default function Head_stripe({onError, onSuccess}) {
 
         const cardElement = elements.getElement(CardElement);
         const cardHolderName = event.target.cardHolder.value;
+        
+        // RADAR SESSION
 
+        const { radarSession, error: radarError } =
+        await stripe.createRadarSession();
+        
         const { error, paymentMethod } = await stripe.createPaymentMethod({
             type: 'card',
             card: cardElement,
@@ -74,6 +79,7 @@ export default function Head_stripe({onError, onSuccess}) {
                 },
                 body: JSON.stringify({ 
                     payment_method: id,
+                    radar_session: radarSession,
                     cardHolderName
                 }),
             })
