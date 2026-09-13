@@ -47,20 +47,16 @@ export default function Head_stripe({onError, onSuccess}) {
         setIsProcessing(true);
 
         const cardElement = elements.getElement(CardElement);
+        const cardHolderName = event.target.cardHolder.value;
 
-// CREAR RADAR SESSION
-const { radarSession, error: radarError } =
-    await stripe.createRadarSession();
-
-if (radarError) {
-    console.error("Radar Session error:", radarError);
-    return setError(radarError.message);
-}
-
-const { error, paymentMethod } = await stripe.createPaymentMethod({
-    type: 'card',
-    card: cardElement
-});
+        const { error, paymentMethod } = await stripe.createPaymentMethod({
+            type: 'card',
+            card: cardElement,
+            billing_details: {
+                name: cardHolderName,
+                email: email
+            },
+        });
 
         if (error) {
             setError("error");
@@ -78,7 +74,7 @@ const { error, paymentMethod } = await stripe.createPaymentMethod({
                 },
                 body: JSON.stringify({ 
                     payment_method: id,
-                    radar_session: radarSession,
+                    cardHolderName
                 }),
             })
             .then(async(r) => {
@@ -95,7 +91,8 @@ const { error, paymentMethod } = await stripe.createPaymentMethod({
                     if(data.status === "requires_action" || data.status === "requires_confirmation"){
                             const { paymentIntent } = await stripe.confirmCardPayment(data.id, {
                                 payment_method: {
-                                    card: elements.getElement(CardElement)
+                                    card: elements.getElement(CardElement),
+                                    billing_details: { name: cardHolderName, email },
                                 }})
                             if(!paymentIntent) return setError("Declined Card");
                             if (paymentIntent.status === "requires_capture") {
@@ -159,7 +156,7 @@ const { error, paymentMethod } = await stripe.createPaymentMethod({
         }
     };
 
-   return (
+    return (
         <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col">
