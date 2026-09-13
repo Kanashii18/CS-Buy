@@ -291,7 +291,7 @@ io.on('connection', (socket) => {
 // ============================================================ //
 
 // Fastify plugins
-const sign = v => crypto.createHmac("sha256", process.env.DEVICE_SECRET).update(v).digest("base64url");
+const sign = v => crypto.createHmac("sha256", "testing").update(v).digest("base64url");
 const COOKIE = "__did";
 
 async function ensureDevice(request, reply) {
