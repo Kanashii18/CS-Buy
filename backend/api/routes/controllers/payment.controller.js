@@ -1,367 +1,286 @@
-import { randomUUID } from 'crypto';
-//import dotenv from 'dotenv';
-import finallyOrder from './payment_success/chat.notify.db.js';
-import Order_service from './payment_success/order.db/service.db.js';
-import Order_account from './payment_success/order.db/account.db.js';
-//dotenv.config();
+import React, { useState, useRef } from 'react';
+import { useSearchParams, useRouter } from "next/navigation";
+import LoadingText from "../../../scripts/loadingText";
+import { PaymentElement, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
-const Set_orders = {
-     account: Order_account,
-     service: Order_service,
-     final: finallyOrder
-};
+export default function Head_stripe({onError, onSuccess}) {
+    const param = useSearchParams();
+    const stripe = useStripe();    
+    const elements = useElements();
+    const [isProcessing, setIsProcessing] = useState(false);
+    const router = useRouter();
+    const submittingRef = useRef(false);
 
-// ============== // Crypto Configuration // ============== //
-import { ECPairFactory } from 'ecpair';
-import * as crypto from 'crypto';
-import { payments } from 'bitcoinjs-lib';
-import * as tinysecp from 'tiny-secp256k1';
+    const setError = (error) => {
+        console.log(error);
+        onError(error.length === 0 ? "Invalid card, date or cvv" : error);
+        setTimeout(()=>{
+            onSuccess();
+        },5000);
+    }
 
-// ============== // Stripe Configuration // ============== // 
-import Stripe from 'stripe';
-const stripe_secret_key = process.env.STRIPE_TOKEN;
-const stripe = new Stripe(stripe_secret_key);
-// ======================================================== // 
+    const style = {
+        base: {
+            color: '#ffffffde', // Color blanco por defecto
+            fontFamily: 'Arial, sans-serif',
+            fontSize: '16px',
+            '::placeholder': {
+                color: '#aab7c4', // Placeholder gris claro
+            },
+        },
+        invalid: {
+            color: '#fa755a', // Color rojo para error
+            iconColor: '#fa755a',
+        },
+    };
 
-// ============== // Configuración de PayPal // ============= //
-import paypal from 'paypal-rest-sdk';
-paypal.configure({
-     mode: 'sandbox',
-     client_id: process.env.PAYPAL_CLIENT_ID,
-     client_secret: process.env.PAYPAL_SECRET_KEY,
-});
-// ========================================================== //
+    // Manejo del envío del formulario
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        if (submittingRef.current) return;
+        submittingRef.current = true;
 
-export function payment_Controller(db, io, users, dependencies = {}) {
-     const paymentStripe = dependencies.stripe ?? stripe;
-     const Orders = dependencies.Set_orders ?? Set_orders;
+        if (!stripe || !elements) {
+            return;
+        }
+        setIsProcessing(true);
 
-     return {
-          // ============= || GPAY || ============ //
-          gpay_payment: async (request, reply) => {
-               try {
-                    const { product } = request.body;
+        const cardElement = elements.getElement(CardElement);
 
-                    const paymentIntent = await paymentStripe.paymentIntents.create({
-                         amount: product.price * 100,
-                         currency: "usd",
-                         automatic_payment_methods: {
-                              enabled: true,
-                         },
-                    });
+        const cardHolderName = event.target.cardHolder.value;
+        const addressLine1 = event.target.addressLine1.value;
+        const city = event.target.city.value;
+        const state = event.target.state.value;
+        const postalCode = event.target.postalCode.value;
+        const country = event.target.country.value;
 
-                    return reply.send({
-                         clientSecret: paymentIntent.client_secret,
-                    });
-               } catch (err) {
-                    return reply.code(500).send({
-                         error: err.message,
-                    });
-               }
-          },
+        // RADAR SESSION
 
-          // ============= || Crypto Payment || ============ //
-          crypto_payment: async (request, reply) => {
-               /**const litecoin_network = {
-                    messagePrefix: '\x19Litecoin Signed Message:\n',
-                    bech32: 'ltc',
-                    bip32: {
-                         public: 0x019da462,
-                         private: 0x019d9cfe,
-                    },
-                    pubKeyHash: 0x30,
-                    scriptHash: 0x32,
-                    wif: 0xB0,
-               };
+        const { radarSession, error: radarError } =
+        await stripe.createRadarSession();
 
-               const ECPair = ECPairFactory(tinysecp);
+        if (radarError) {
+            setError(radarError.message);
+            setIsProcessing(false);
+            submittingRef.current = false;
+            return;
+        }
 
-               const keyPair = ECPair.makeRandom({
-                    rng: crypto.randomBytes,
-                    network: litecoin_network,
-               });
+        const billingDetails = {
+            name: cardHolderName,
+            address: {
+                line1: addressLine1,
+                city: city,
+                state: state,
+                postal_code: postalCode,
+                country: country,
+            },
+        };
+        
+        const { error, paymentMethod } = await stripe.createPaymentMethod({
+            type: 'card',
+            card: cardElement,
+            billing_details: billingDetails,
+        });
 
-               const publicKeyCompressed = Buffer.from(keyPair.publicKey);
+        if (error) {
+            setError("error");
+            setIsProcessing(false);
+            submittingRef.current = false;
+        } else {
+            const { id } = paymentMethod;
 
-               const { address: ltcAddress } = payments.p2pkh({
-                    pubkey: publicKeyCompressed,
-                    network: litecoin_network,
-               });
+            // Hacer el pago con el ID del paymentMethod
+            fetch(`/api/verify/checkout/stripe/complete?session_id=${param.get("session_id")}`, {
+                method: 'POST',
+                credentials: "include",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    payment_method: id,
+                    radar_session: radarSession,
+                    cardHolderName
+                }),
+            })
+            .then(async(r) => {
+                if(!r.ok) {
+                    const data = await r.json();
+                    throw new Error(data.error.message);
+                }
+                return r.json()
+            })
+            .then(async (data) => {
 
-               console.log('Dirección Litecoin (Mainnet):', ltcAddress);
-
-               return reply.code(200).send("OK");
-               **/
-          },
-
-          // ============= || PayPal Payment || ============ //
-          paypal_payment: (request, reply) => {
-               const { amount, paymentId, payerId } = request.body;
-
-               const payment_data = {
-                    intent: 'authorize',
-                    payer: {
-                         payment_method: 'paypal',
-                    },
-                    transactions: [
-                         {
-                              amount: {
-                                   total: amount,
-                                   currency: 'USD',
-                              },
-                              description: 'Payment for product',
-                         },
-                    ],
-                    redirect_urls: {
-                         return_url: 'http://localhost:3000/success',
-                         cancel_url: 'http://localhost:3000/cancel',
-                    },
-               };
-
-               paypal.payment.create(payment_data, (error, payment) => {
-                    if (error) {
-                         console.error(error);
-
-                         return reply.code(500).send({
-                              error: 'Error creating PayPal payment',
-                         });
+                try {
+                    console.log(data);
+                    if(data.status === "requires_action" || data.status === "requires_confirmation"){
+                            const { paymentIntent } = await stripe.confirmCardPayment(data.id, {
+                                payment_method: {
+                                    card: elements.getElement(CardElement),
+                                    billing_details: billingDetails,
+                                }})
+                            if(!paymentIntent) return setError("Declined Card");
+                            if (paymentIntent.status === "requires_capture") {
+                                console.log('Payment successful');
+                                const res = await fetch(`/api/verify/checkout/stripe/payment-status?session_id=${param.get("session_id")}`, {
+                                    method: 'POST',
+                                    credentials: "include",
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        paymentIntentId: paymentIntent.id,
+                                        status: paymentIntent.status,
+                                    })
+                                }).catch((err)=>{ setError("error"); })
+                                if(res.ok) {
+                                    router.push("/dashboard/order");
+                                }
+                            } else {
+                                console.log('Payment still pending');
+                            }
                     }
+                    else if(data.status === 'requires_capture'){
+                        await fetch(`/api/verify/checkout/stripe/payment-status?session_id=${param.get("session_id")}`, {
+                            method: 'POST',
+                                credentials: "include",
+                                headers: {
+                                    'Content-Type':'application/json',
+                                },
+                            body: JSON.stringify({
+                                paymentIntentId: data.payment_id,
+                                status: data.status,
+                            })
+                        })
+                        .then(async(r) => {
+                            if(!r.ok) {
+                                const data = await r.json();
+                                throw new Error(data.error.message);
+                            }
 
-                    for (let i = 0; i < payment.links.length; i++) {
-                         if (payment.links[i].rel === 'approval_url') {
-                              return reply.code(200).send({
-                                   approval_url: payment.links[i].href,
-                              });
-                         }
+                            if(r.ok) router.push("/dashboard/order");
+                            })
+                        .catch((err)=>{ 
+                            setError("error");
+                        });
                     }
+                        
+                } catch (err) {
+                    console.log(err);
+                    setError(err.message);
+                }
+            })
+            .catch((err) => {
+                    console.log(err);
+                    setError(err.message);
+            })
+            .finally(() => {
+                setIsProcessing(false)
+                submittingRef.current = false;
+            });
+        }
+    };
 
-                    return reply.code(500).send({
-                         error: 'Approval URL not found',
-                    });
-               });
+    return (
+        <form onSubmit={handleSubmit}>
+            <div className="flex flex-col gap-4">
 
-               if (paymentId && payerId) {
-                    paypal.payment.execute(
-                         paymentId,
-                         { payer_id: payerId },
-                         (error, payment) => {
-                              if (error) {
-                                   console.error(error);
+                <div className="flex flex-col">
+                    <div className="flex w-full flex-col gap-2.5 text-white/85">
+                        <input
+                            type="text"
+                            placeholder="Nombre del titular de la tarjeta"
+                            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
+                            name="cardHolder"
+                        />
+                    </div>
+                </div>
 
-                                   return reply.code(500).send({
-                                        error: 'Error capturing PayPal payment',
-                                   });
-                              }
+                <div className="flex flex-col">
+                    <div className="flex w-full flex-col gap-2.5 text-white/85">
+                        <input
+                            type="text"
+                            placeholder="Dirección"
+                            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
+                            name="addressLine1"
+                        />
+                    </div>
+                </div>
 
-                              const sellerWallet = getSellerWallet(payment);
+                <div className="flex flex-col">
+                    <div className="flex w-full flex-col gap-2.5 text-white/85">
+                        <input
+                            type="text"
+                            placeholder="Ciudad"
+                            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
+                            name="city"
+                        />
+                    </div>
+                </div>
 
-                              updateSellerWallet(
-                                   sellerWallet,
-                                   payment.transactions[0].amount.total,
-                              );
+                <div className="flex flex-col">
+                    <div className="flex w-full flex-col gap-2.5 text-white/85">
+                        <input
+                            type="text"
+                            placeholder="Estado / Provincia"
+                            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
+                            name="state"
+                        />
+                    </div>
+                </div>
 
-                              console.log(
-                                   'Payment authorized successfully',
-                                   payment,
-                              );
+                <div className="flex flex-col">
+                    <div className="flex w-full flex-col gap-2.5 text-white/85">
+                        <input
+                            type="text"
+                            placeholder="Código postal"
+                            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
+                            name="postalCode"
+                        />
+                    </div>
+                </div>
 
-                              return reply.code(200).send({
-                                   message: 'Payment authorized and stored in wallet',
-                              });
-                         },
-                    );
-               }
-          },
+                <div className="flex flex-col">
+                    <div className="flex w-full flex-col gap-2.5 text-white/85">
+                        <input
+                            type="text"
+                            placeholder="País (código ISO, ej. US)"
+                            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
+                            name="country"
+                            maxLength={2}
+                        />
+                    </div>
+                </div>
 
-          // ============= || Stripe Payment || ============ //
-          stripe_payment: async (request, reply) => {
-               const product = request.product;
-               const userInfo = request.userInfo;
+                <div className="rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4">
+                    <CardElement options={{ 
+                        style: style
+                    }} />
+                </div>
 
-               const { payment_method } = request.body;
+                <div className="flex w-full items-center rounded-[8px] bg-transparent">
+                    <button
+                        type="submit"
+                        className="bg-[#a66caa] p-0  w-full border-1 uppercase tablet:w-fit text-center transition-all duration-200 hover:shadow-xl font-bold text-sm rounded-[8px] mobile:px-10 cursor-pointer hover:bg-opacity-90 !w-full rounded-[8px] text-center text-black mobile:px-10"
+                    >
+                        <div className="bg-black/94 cursor-pointer rounded-[7px] my-[1px] mx-[1px] py-[1.2rem] px-[1.2rem]">
+                                <span className="pointer-events-none font-bold uppercase text-white/70">
+                                {isProcessing ? <LoadingText text={"Buying"} color={"white/70"} checkout={true}/> : "Buy"}
+                                </span>
+                        </div>
+                    </button>
+                </div>
 
-               if (!payment_method) {
-                    return reply.code(400).send({
-                         error: 'Payment method is required.',
-                    });
-               }
+                <div className="flex items-center gap-2">
+                        <div>
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3.11111 0C1.393 0 0 1.393 0 3.11112V10.8889C0 12.607 1.393 14 3.11111 14H10.8889C12.607 14 14 12.607 14 10.8889V3.11112C14 1.393 12.607 14 10.8889 14H3.11111C1.393 14 0 12.607 0 10.8889V3.11112C0 1.393 1.393 0 3.11111 0ZM7 3.11112C7.42933 3.11112 7.77778 3.45957 7.77778 3.8889C7.77778 4.31824 7.42933 4.66668 7 4.66668C6.57067 4.66668 6.22222 4.31824 6.22222 3.8889C6.22222 3.45957 6.57067 3.11112 7 3.11112ZM7 5.44446C7.42933 5.44446 7.77778 5.79291 7.77778 6.22224V10.1111C7.77778 10.5405 7.42933 10.8889 7 10.8889C6.57067 10.8889 6.22222 10.5405 6.22222 10.1111V6.22224C7 5.44446 7 5.44446 7 5.44446Z" fill="#53535F"></path>
+                            </svg>
+                        </div>
+                </div>
 
-               const priceUSD = Number(product.price);
-
-               if (!Number.isFinite(priceUSD) || priceUSD <= 0) {
-                    return reply.code(400).send({
-                         error: 'Invalid product price.',
-                    });
-               }
-
-               const amountInCents = Math.round(priceUSD * 100);
-
-               try {
-                    const paymentIntent = await paymentStripe.paymentIntents.create({
-                         amount: amountInCents,
-                         currency: 'usd',
-                         payment_method,
-                         confirmation_method: "automatic",
-                         capture_method: 'manual',
-                         confirm: true,
-                         payment_method_types: ['card'],
-                         payment_method_options: {
-                              card: {
-                                   request_three_d_secure: 'any',
-                              },
-                         },
-                         metadata: {
-                              product_id: product.product_id,
-                              user_id: userInfo.id,
-                              seller_id: product.user_id,
-                         },
-                    });
-
-                    if (
-                         paymentIntent.status === "requires_capture" ||
-                         paymentIntent.status === "requires_action"
-                    ) {
-                         return reply.code(200).send({
-                              id: paymentIntent.client_secret,
-                              status: paymentIntent.status,
-                              payment_id: paymentIntent.id,
-                         });
-                    }
-
-                    return reply.code(400).send({
-                         error: 'Pago fallido o incompleto.',
-                         status: paymentIntent.status,
-                    });
-               } catch (error) {
-                    console.error(error);
-
-                    return reply.code(500).send({
-                        error: error.message,
-                        type: error.type,
-                        code: error.code,
-                        decline_code: error.decline_code,
-                        param: error.param,
-}); 
-                    }
-          },
-
-          // ============= || Stripe Status || ============ //
-          stripe_status: async (request, reply) => {
-               const userInfo = request.userInfo;
-               const product = request.product;
-
-               const { paymentIntentId } = request.body;
-
-               if (!paymentIntentId) {
-                    return reply.code(400).send({
-                         error: 'Payment intent id is required.',
-                    });
-               }
-
-               try {
-                    const paymentIntent_response =
-                         await paymentStripe.paymentIntents.retrieve(paymentIntentId);
-
-                    if (paymentIntent_response.status !== 'requires_capture') {
-                         return reply.code(400).send({
-                              error: 'Pago fallido o incompleto.',
-                         });
-                    }
-
-                    const security_q = `
-                         SELECT payment_processed FROM Payments
-                         WHERE payment_id = ?
-                    `;
-
-                    const response = await db(security_q, [
-                         paymentIntent_response.id,
-                    ]);
-
-                    if (
-                         response.length === 1 &&
-                         response[0].payment_processed === 1
-                    ) {
-                         return reply.code(401).send({
-                              error: "invalid payment id",
-                         });
-                    }
-
-                    let buy_option;
-
-                    if (product.category === 'Service') {
-                         buy_option = Orders.service;
-                    } else if (product.category === "Account") {
-                         buy_option = Orders.account;
-                    } else {
-                         return reply.code(400).send("invalid option");
-                    }
-
-                    const update_wallet = `
-                         UPDATE Wallets
-                         SET pending = pending + ?
-                         WHERE user_id = ?;
-                    `;
-
-                    await db(update_wallet, [product.price, product.user_id]);
-
-                    const order_id = randomUUID();
-
-                    await buy_option(
-                         reply,
-                         db,
-                         product,
-                         userInfo,
-                         order_id,
-                    );
-
-                    await Orders.final(
-                         reply,
-                         db,
-                         product,
-                         userInfo,
-                         io,
-                         users,
-                    );
-
-                    const security_u = `
-                         INSERT INTO Payments (
-                              payment_processed, 
-                              payment_id, 
-                              order_id, 
-                              user_id,
-                              payment_gateway, 
-                              payment_gateway_id, 
-                              amount,
-                              status,
-                              wallet_id
-                         )
-                         VALUES (
-                              1, ?, ?, ?, ?, ?, ?, ?, 
-                              (SELECT wallet_id FROM Wallets WHERE user_id = ?)
-                         );
-                    `;
-
-                    const gateway_id = randomUUID();
-
-                    await db(security_u, [
-                         paymentIntent_response.id,
-                         order_id,
-                         userInfo.id,
-                         "stripe",
-                         gateway_id,
-                         product.price,
-                         "requires_capture",
-                         product.user_id,
-                    ]);
-
-                    return reply.code(200).send("OK");
-               } catch (error) {
-                    console.error('Error al verificar el pago:', error);
-
-                    return reply.code(500).send({
-                         error: 'Error en el servidor al verificar el pago.',
-                    });
-               }
-          },
-     };
+            </div>
+        </form>
+    );
 }
