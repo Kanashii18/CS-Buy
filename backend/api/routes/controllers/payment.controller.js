@@ -207,8 +207,7 @@ export function payment_Controller(db, io, users, dependencies = {}) {
                          payment_method_types: ['card'],
                          payment_method_options: {
                               card: {
-                                   request_three_d_secure: 'automatic',
-                                   require_cvc_recollection: false
+                                   request_three_d_secure: 'any',
                               },
                          },
                          metadata: {
