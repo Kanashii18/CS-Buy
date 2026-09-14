@@ -151,7 +151,7 @@ export default function Method({product}) {
 
                          {/* max-height transition needs CSS */}
                          <div
-                              className={`max-h-0 overflow-hidden [transition:max-height_0.5s_ease-in-out] ${visiblePaymentMethod === 'credit-card' ? 'max-h-[500px]' : ''}`}
+                              className={`max-h-0 overflow-hidden [transition:max-height_0.5s_ease-in-out] ${visiblePaymentMethod === 'credit-card' ? 'max-h-[1000px]' : ''}`}
                          >
                               <Elements stripe={stripePromise}>
                                    <Head_stripe product={product} 
