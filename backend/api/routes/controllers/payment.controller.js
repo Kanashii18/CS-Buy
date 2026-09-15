@@ -197,6 +197,12 @@ export function payment_Controller(db, io, users, dependencies = {}) {
                const amountInCents = Math.round(priceUSD * 100);
 
                try {
+                    console.log("=== STRIPE PAYMENT DEBUG ===");
+
+console.log("payment_method:", payment_method);
+console.log("radar_session:", radar_session);
+console.log("radar_session_type:", typeof radar_session);
+console.log("amount:", amountInCents);
                     const paymentIntent = await paymentStripe.paymentIntents.create({
                          amount: amountInCents,
                          currency: 'usd',
