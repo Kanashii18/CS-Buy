@@ -178,7 +178,7 @@ export function payment_Controller(db, io, users, dependencies = {}) {
                const product = request.product;
                const userInfo = request.userInfo;
 
-               const { payment_method } = request.body;
+               const { payment_method, radar_session } = request.body;
 
                if (!payment_method) {
                     return reply.code(400).send({
@@ -201,6 +201,11 @@ export function payment_Controller(db, io, users, dependencies = {}) {
                          amount: amountInCents,
                          currency: 'usd',
                          payment_method,
+                         radar_options: {
+
+        session: radar_session,
+
+    },
                          confirmation_method: "automatic",
                          capture_method: 'manual',
                          confirm: true,
