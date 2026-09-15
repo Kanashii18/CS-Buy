@@ -120,7 +120,7 @@ export default function Head_stripe({ onError, onSuccess }) {
                 },
                 body: JSON.stringify({
                     payment_method: id,
-                    radar_session: radarSession,
+                    radar_session: radarSession.id,
                     cardHolderName,
                 }),
             }
