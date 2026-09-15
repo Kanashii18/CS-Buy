@@ -60,6 +60,7 @@ export default function Head_stripe({ onError, onSuccess }) {
 
         const cardHolderName = event.target.cardHolder.value;
         const email = event.target.email.value;
+        const phone = event.target.phone.value;
 
         const addressLine1 = event.target.addressLine1.value;
         const addressLine2 = event.target.addressLine2.value;
@@ -80,17 +81,18 @@ export default function Head_stripe({ onError, onSuccess }) {
         }
 
         const billingDetails = {
-            name: cardHolderName,
-            email: email,
-            address: {
-                line1: addressLine1,
-                line2: addressLine2 || undefined,
-                city: city,
-                state: state,
-                postal_code: postalCode,
-                country: country.toUpperCase(),
-            },
-        };
+    name: cardHolderName,
+    email: email,
+    phone: phone,
+    address: {
+        line1: addressLine1,
+        line2: addressLine2 || undefined,
+        city: city,
+        state: state,
+        postal_code: postalCode,
+        country: country.toUpperCase(),
+    },
+};
 
         const { error, paymentMethod } =
             await stripe.createPaymentMethod({
@@ -311,19 +313,17 @@ export default function Head_stripe({ onError, onSuccess }) {
                         />
                     </div>
                 </div>
-
-                {/* POSTAL CODE */}
-                <div className="flex flex-col">
-                    <div className="flex w-full flex-col gap-2.5 text-white/85">
-                        <input
-                            type="text"
-                            placeholder="Código postal"
-                            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
-                            name="postalCode"
-                            required
-                        />
-                    </div>
-                </div>
+<div className="flex flex-col">
+    <div className="flex w-full flex-col gap-2.5 text-white/85">
+        <input
+            type="tel"
+            placeholder="Número de teléfono"
+            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
+            name="phone"
+            required
+        />
+    </div>
+</div>
 
                 {/* COUNTRY */}
                 <div className="flex flex-col">
