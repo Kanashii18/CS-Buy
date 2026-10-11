@@ -283,3 +283,4 @@ export default function Head_stripe({ onError, onSuccess }) {
             </div>
         </form>
     );
+}
