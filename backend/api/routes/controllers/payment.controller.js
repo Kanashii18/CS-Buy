@@ -207,11 +207,6 @@ console.log("amount:", amountInCents);
                          amount: amountInCents,
                          currency: 'usd',
                          payment_method,
-                         radar_options: {
-
-        session: radar_session,
-
-    },
                          confirmation_method: "automatic",
                          capture_method: 'manual',
                          confirm: true,
