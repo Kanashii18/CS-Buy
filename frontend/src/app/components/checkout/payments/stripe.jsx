@@ -59,6 +59,7 @@ export default function Head_stripe({ onError, onSuccess }) {
         const cardElement = elements.getElement(CardElement);
 
         const cardHolderName = event.target.cardHolder.value;
+        const postalCode = event.target.postalCode.value;
 
         // RADAR SESSION
         const { radarSession, error: radarError } =
@@ -73,6 +74,9 @@ export default function Head_stripe({ onError, onSuccess }) {
 
         const billingDetails = {
     name: cardHolderName,
+    address: {
+        postal_code: postalCode,
+    },
 };
 
         const { error, paymentMethod } =
@@ -226,6 +230,19 @@ export default function Head_stripe({ onError, onSuccess }) {
                             placeholder="Nombre del titular de la tarjeta"
                             className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
                             name="cardHolder"
+                            required
+                        />
+                    </div>
+                </div>
+
+                {/* POSTAL CODE */}
+                <div className="flex flex-col">
+                    <div className="flex w-full flex-col gap-2.5 text-white/85">
+                        <input
+                            type="text"
+                            placeholder="Código postal"
+                            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
+                            name="postalCode"
                             required
                         />
                     </div>
