@@ -59,15 +59,6 @@ export default function Head_stripe({ onError, onSuccess }) {
         const cardElement = elements.getElement(CardElement);
 
         const cardHolderName = event.target.cardHolder.value;
-        const email = event.target.email.value;
-        const phone = event.target.phone.value;
-
-        const addressLine1 = event.target.addressLine1.value;
-        const addressLine2 = event.target.addressLine2.value;
-        const city = event.target.city.value;
-        const state = event.target.state.value;
-        const postalCode = event.target.postalCode.value;
-        const country = event.target.country.value;
 
         // RADAR SESSION
         const { radarSession, error: radarError } =
@@ -82,16 +73,6 @@ export default function Head_stripe({ onError, onSuccess }) {
 
         const billingDetails = {
     name: cardHolderName,
-    email: email,
-    phone: phone,
-    address: {
-        line1: addressLine1,
-        line2: addressLine2 || undefined,
-        city: city,
-        state: state,
-        postal_code: postalCode,
-        country: country.toUpperCase(),
-    },
 };
 
         const { error, paymentMethod } =
@@ -250,112 +231,12 @@ export default function Head_stripe({ onError, onSuccess }) {
                     </div>
                 </div>
 
-                {/* EMAIL */}
-                <div className="flex flex-col">
-                    <div className="flex w-full flex-col gap-2.5 text-white/85">
-                        <input
-                            type="email"
-                            placeholder="Correo"
-                            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
-                            name="email"
-                            required
-                        />
-                    </div>
-                </div>
-
-                {/* ADDRESS LINE 1 */}
-                <div className="flex flex-col">
-                    <div className="flex w-full flex-col gap-2.5 text-white/85">
-                        <input
-                            type="text"
-                            placeholder="Dirección"
-                            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
-                            name="addressLine1"
-                            required
-                        />
-                    </div>
-                </div>
-
-                {/* ADDRESS LINE 2 */}
-                <div className="flex flex-col">
-                    <div className="flex w-full flex-col gap-2.5 text-white/85">
-                        <input
-                            type="text"
-                            placeholder="Apartamento / Suite (opcional)"
-                            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
-                            name="addressLine2"
-                        />
-                    </div>
-                </div>
-
-                {/* CITY */}
-                <div className="flex flex-col">
-                    <div className="flex w-full flex-col gap-2.5 text-white/85">
-                        <input
-                            type="text"
-                            placeholder="Ciudad"
-                            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
-                            name="city"
-                            required
-                        />
-                    </div>
-                </div>
-
-                {/* STATE */}
-                <div className="flex flex-col">
-                    <div className="flex w-full flex-col gap-2.5 text-white/85">
-                        <input
-                            type="text"
-                            placeholder="Estado / Provincia"
-                            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
-                            name="state"
-                            required
-                        />
-                    </div>
-                </div>
-<div className="flex flex-col">
-    <div className="flex w-full flex-col gap-2.5 text-white/85">
-        <input
-            type="tel"
-            placeholder="Número de teléfono"
-            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
-            name="phone"
-            required
-        />
-    </div>
-</div>
-
-                {/* POSTAL CODE */}
-                <div className="flex flex-col">
-                    <div className="flex w-full flex-col gap-2.5 text-white/85">
-                        <input
-                            type="text"
-                            placeholder="Código postal"
-                            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
-                            name="postalCode"
-                            required
-                        />
-                    </div>
-                </div>
-                {/* COUNTRY */}
-                <div className="flex flex-col">
-                    <div className="flex w-full flex-col gap-2.5 text-white/85">
-                        <input
-                            type="text"
-                            placeholder="País (código ISO, ej. US)"
-                            className="w-full rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4 text-[var(--fontSize-sm)] font-medium uppercase text-[#D6E4EF] outline-none placeholder:font-medium placeholder:text-[#D6E4EF] focus:outline-none"
-                            name="country"
-                            maxLength={2}
-                            required
-                        />
-                    </div>
-                </div>
-
                 {/* CARD */}
                 <div className="rounded-[.35rem] border border-[#7c6583] bg-[#0d0c14] px-10 py-4">
                     <CardElement
                         options={{
-                            style: style
+                            style: style,
+                            hidePostalCode: true
                         }}
                     />
                 </div>
@@ -402,4 +283,3 @@ export default function Head_stripe({ onError, onSuccess }) {
             </div>
         </form>
     );
-}
