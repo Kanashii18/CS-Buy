@@ -5,18 +5,30 @@ import type { DB } from "../../../../types/db.type.ts";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { RoomId } from "../../../../types/chat/overview.type.ts";
 import type { IdQuery } from "../../../../types/request.type.ts";
-
+import type { postChatBody } from "../../../../types/chat/overview.type.ts";
 /**
  * This function returns an object containing the chat controllers.
  * @returns An object with the chat controllers.
  */
-export default function chat_controller(db : DB){
-     return {     
+export default function chat_controller(db: DB) {
+     return {
           // Read chat messages in the indicate chat
-          readRoom: (request: FastifyRequest<{Body:RoomId}>, reply: FastifyReply) => readRoomController({ db, request, reply }),
+          readRoom: (
+               request: FastifyRequest<{ Body: RoomId }>,
+               reply: FastifyReply,
+          ) => readRoomController({ db, request, reply }),
           // Send new message in the indicate chat
-          postChat: (request: FastifyRequest, reply: FastifyReply) => postChatController({ db, request, reply }),
+          postChat: ({
+               request,
+               reply,
+          }: {
+               request: FastifyRequest<{ Body: postChatBody }>;
+               reply: FastifyReply;
+          }) => postChatController({ db, request, reply }),
           // Get unread messages
-          get_unread: (request: FastifyRequest<{Querystring:IdQuery}>, reply: FastifyReply) => getUnreadController({ db, request, reply })
+          get_unread: (
+               request: FastifyRequest<{ Querystring: IdQuery }>,
+               reply: FastifyReply,
+          ) => getUnreadController({ db, request, reply }),
      };
 }
