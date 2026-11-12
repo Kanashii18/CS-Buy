@@ -18,13 +18,10 @@ export default function chat_controller(db: DB) {
                reply: FastifyReply,
           ) => readRoomController({ db, request, reply }),
           // Send new message in the indicate chat
-          postChat: ({
-               request,
-               reply,
-          }: {
-               request: FastifyRequest<{ Body: postChatBody }>;
-               reply: FastifyReply;
-          }) => postChatController({ db, request, reply }),
+          postChat: (
+               request: FastifyRequest<{ Body: postChatBody }>,
+               reply: FastifyReply,
+          ) => postChatController({ db, request, reply }),
           // Get unread messages
           get_unread: (
                request: FastifyRequest<{ Querystring: IdQuery }>,
