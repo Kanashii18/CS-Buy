@@ -18,6 +18,7 @@ views
 backup.sql
 testing.db
 
+
 package-lock.json
 node_modules
 
@@ -35,3 +36,4 @@ eslint.config.js
 *.njsproj
 *.sln
 *.sw?
+.gitignore
