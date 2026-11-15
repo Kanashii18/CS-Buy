@@ -29,7 +29,7 @@ import { db } from "./scripts/db.ts";
 // dir: indicamos la ruta de fronted a partir de la raiz,
 // ej backend/api/api.ks | frontend/
 const app = next({
-     dev: Dev,
+     dev: Dev, // testing / production
      dir: dir,
 });
 
