@@ -24,6 +24,7 @@
           "@tailwindcss/postcss": "^4.3.5",
           "@tensorflow/tfjs": "^4.22.0",
           "@types/jsonwebtoken": "^9.0.10",
+          "autoprefixer": "^10.6.2",
           "bcrypt": "^6.0.0",
           "better-sqlite3": "^12.2.0",
           "bitcoinjs-lib": "^6.1.7",
