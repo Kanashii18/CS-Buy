@@ -9,7 +9,9 @@
      "scripts": {
           "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js backend/**/* --runInBand --verbose",
           "a": "node ./backend/api/api.ts",
-          "api": "node --watch ./backend/api/api.ts"
+          "api": "node --watch ./backend/api/api.ts",
+          "build": "next build frontend",
+          "start": "next start frontend"
      },
      "dependencies": {
           "@fastify/cookie": "^11.0.2",
