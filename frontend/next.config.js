@@ -3,4 +3,4 @@ const nextConfig = {
      outputFileTracingRoot: process.cwd(),
 };
 
-module.exports = nextConfig;
+export default nextConfig;

@@ -10,6 +10,7 @@ export default function Container_Main(){
      const [email, setEmail] = useState("");
      const [password, setPassword] = useState("");
      const [confirmPassword, setConfirm] = useState("");
+     const [showPasswords, setShowPasswords] = useState(false);
      const [error, setError] = useState(null);
      const [termsneed, setTermsneed] = useState(true);
      const [loading, setLoading] = useState(false);
@@ -105,6 +106,8 @@ export default function Container_Main(){
                          text={password.length <= 0 ? "Password" : ""}
                          value={password}
                          onChange={(e) => setPassword(e.target.value)}
+                         showPassword={showPasswords}
+                         onTogglePassword={() => setShowPasswords((prev) => !prev)}
                     />
 
                     <Password_input
@@ -112,6 +115,8 @@ export default function Container_Main(){
                          text= {confirmPassword.length <= 0 ? "Confirm Password" : ""}
                          value={confirmPassword}
                          onChange={(e) => setConfirm(e.target.value)}
+                         showPassword={showPasswords}
+                         onTogglePassword={() => setShowPasswords((prev) => !prev)}
                     />
 
                     <Terms TermsAndConditions={setTermsneed} />

@@ -2,8 +2,26 @@
 
 import { useState } from "react";
 
-export default function PasswordInput({ id, text, value, onChange }) {
-     const [showPassword, setShowPassword] = useState(false);
+export default function PasswordInput({
+     id,
+     text,
+     value,
+     onChange,
+     showPassword: controlledShowPassword,
+     onTogglePassword,
+}) {
+     const [internalShow, setInternalShow] = useState(false);
+
+     const isControlled = typeof controlledShowPassword === "boolean";
+     const showPassword = isControlled ? controlledShowPassword : internalShow;
+
+     const handleToggle = () => {
+          if (onTogglePassword) {
+               onTogglePassword();
+          } else {
+               setInternalShow((prev) => !prev);
+          }
+     };
 
      return (
           <div className="whitespace-nowrap relative w-full max-w-[400px] text-white">
@@ -55,7 +73,7 @@ export default function PasswordInput({ id, text, value, onChange }) {
                <button
                     type="button"
                     tabIndex={-1}
-                    onClick={() => setShowPassword((prev) => !prev)}
+                    onClick={handleToggle}
                     className="
           absolute
           right-1
