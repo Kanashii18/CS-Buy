@@ -1,12 +1,12 @@
-import { Server, type Socket } from 'socket.io';
-import { chat_network } from './chat.socket.ts';
-import { notification_network } from './notification.socket.ts';
-import type { FastifyInstance } from 'fastify';
-import { DB } from '../../types/db.type.ts';
+import { Server, type Socket } from "socket.io";
+import { chat_network } from "./chat.socket.ts";
+import { notification_network } from "./notification.socket.ts";
+import type { FastifyInstance } from "fastify";
+import type { DB } from "../../types/db.type.ts";
 
-export function Init_conection(server : FastifyInstance, db:DB){
-     if(typeof server !== "object" || !server){
-          throw new Error(`Server type invalid value, ${typeof(server)}`);
+export function Init_conection(server: FastifyInstance, db: DB) {
+     if (typeof server !== "object" || !server) {
+          throw new Error(`Server type invalid value, ${typeof server}`);
      }
      const users = {};
      const online = new Map();
@@ -20,13 +20,12 @@ export function Init_conection(server : FastifyInstance, db:DB){
           });
      });
 
-
-     io.on('connection', (socket : Socket) => {
+     io.on("connection", (socket: Socket) => {
           const userId = socket.handshake.auth.userId as string;
           if (!userId) {
                console.log("Connection without user, desconnecting...");
                return socket.disconnect();
-          }else{
+          } else {
                console.log("Connected... ", userId);
           }
 
@@ -36,19 +35,25 @@ export function Init_conection(server : FastifyInstance, db:DB){
           online.get(userId).add(socket.id);
 
           socket.on("user:isOnline", ({ userId: targetUserId }, ack) => {
-               console.log("[SERVER] got user:isOnline", targetUserId, "ack?", typeof ack);
+               console.log(
+                    "[SERVER] got user:isOnline",
+                    targetUserId,
+                    "ack?",
+                    typeof ack,
+               );
                const isOnline = online.has(targetUserId);
-               if (typeof ack === "function") ack({ userId: targetUserId, isOnline });
+               if (typeof ack === "function")
+                    ack({ userId: targetUserId, isOnline });
           });
           // initialiizate chat socket
           chat_network(io, users, socket, db, userId);
           // initialiizate notifications socket
           notification_network(io, socket, userId);
-          
+
           // Handle user disconnect
           socket.on("disconnect", () => {
                delete users[socket.data.userId];
           });
      });
-     return {io, users};
+     return { io, users };
 }

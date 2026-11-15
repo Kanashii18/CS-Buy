@@ -1,8 +1,10 @@
 import Fastify from "fastify";
 import "@fastify/cookie";
 import next from "next";
+
 // Server config
 import { bodyLimit, dir, host } from "./config/server_config.ts";
+
 // Load environment variables
 import "dotenv/config";
 
@@ -14,7 +16,7 @@ import type { FastifyInstance } from "fastify";
 import { PORT, Dev } from "./config/env.ts";
 
 // middleware...
-import { ensureDevice } from "./routes/controllers/user/index.js";
+import ensureDevice from "./middleware/ensure_device.ts";
 
 // modules...
 import { Init_conection } from "./modules/connection/set_network.ts";
@@ -40,11 +42,13 @@ const fastify: FastifyInstance = Fastify({
 
 (async function () {
      // Initialize Fastify app
-
      fastify.addHook("preHandler", ensureDevice);
 
      // ========================================================== //
-     const { io, users }: { io: Server; users } = Init_conection(fastify, db);
+     const { io, users }: { io: Server; users: any } = Init_conection(
+          fastify,
+          db,
+     );
      registers_api({ fastify, db, io, users }); // registers api and routes definition
 
      // Catch-all route for SPA
@@ -59,6 +63,7 @@ const fastify: FastifyInstance = Fastify({
      process.env.NODE_ENV !== "test"
           ? await fastify.listen({ port: PORT, host: host })
           : null;
+     console.log({ port: PORT, host: host });
 })();
 
 export default fastify;

@@ -1,11 +1,16 @@
-import { FastifyReply, FastifyRequest } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
 // clear session_token cookie
-export default async function logout(request : FastifyRequest, reply : FastifyReply) : Promise<void> {
+export default async function logout(
+     request: FastifyRequest,
+     reply: FastifyReply,
+): Promise<void> {
      await reply.clearCookie("session_token", {
           httpOnly: true,
           secure: false,
           sameSite: "strict",
-          path: "/"
+          path: "/",
      });
-     await reply.status(200).send({ message: "Sesión cerrada correctamente..." });
+     await reply
+          .status(200)
+          .send({ message: "Sesión cerrada correctamente..." });
 }

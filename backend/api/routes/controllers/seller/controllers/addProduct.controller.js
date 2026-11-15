@@ -1,6 +1,6 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 
-export default async function({db, ci, request, reply}) {
+export default async function ({ db, ci, request, reply }) {
      try {
           const userInfo = request.userInfo;
 
@@ -28,21 +28,35 @@ export default async function({db, ci, request, reply}) {
           for await (const part of parts) {
                if (part.type === "file") {
                     const fileBuffer = await part.toBuffer(); // <-- CLAVE: consume el stream
-                    console.log("FILE:", part.fieldname, part.mimetype, "bytes:", fileBuffer?.length);
+                    console.log(
+                         "FILE:",
+                         part.fieldname,
+                         part.mimetype,
+                         "bytes:",
+                         fileBuffer?.length,
+                    );
                     if (!fileBuffer || fileBuffer.length === 0) {
-                         return reply.code(400).send({ error: `${part.fieldname} is empty (0 bytes)` });
+                         return reply.code(400).send({
+                              error: `${part.fieldname} is empty (0 bytes)`,
+                         });
                     }
                     if (part.fieldname === "image") {
                          image = {
                               buffer: fileBuffer,
                               mimetype: part.mimetype,
-                              filename: part.filename || part.originalFilename || "image",
+                              filename:
+                                   part.filename ||
+                                   part.originalFilename ||
+                                   "image",
                          };
                     } else if (part.fieldname === "asset") {
                          asset = {
                               buffer: fileBuffer,
                               mimetype: part.mimetype,
-                              filename: part.filename || part.originalFilename || "asset",
+                              filename:
+                                   part.filename ||
+                                   part.originalFilename ||
+                                   "asset",
                          };
                     }
                } else {
@@ -50,23 +64,47 @@ export default async function({db, ci, request, reply}) {
                }
           }
 
-          if (!image) return reply.code(400).send({ error: "image is required" });
+          if (!image)
+               return reply.code(400).send({ error: "image is required" });
           if (!ALLOWED_IMAGE.has(image.mimetype)) {
-               return reply.code(400).send({ error: `Unsupported image type: ${image.mimetype}. Please upload Other Type.` });
+               return reply.code(400).send({
+                    error: `Unsupported image type: ${image.mimetype}. Please upload Other Type.`,
+               });
           }
 
-          const { title, category, description, price, deliveryUnit, accounts, service } = body;
+          const {
+               title,
+               category,
+               description,
+               price,
+               deliveryUnit,
+               accounts,
+               service,
+          } = body;
 
-          if (typeof title !== "string" || title.length === 0 || title.length > 42) {
-               return reply.code(400).send({ error: "Title is required and must be a string with max 42 characters" });
+          if (
+               typeof title !== "string" ||
+               title.length === 0 ||
+               title.length > 42
+          ) {
+               return reply.code(400).send({
+                    error: "Title is required and must be a string with max 42 characters",
+               });
           }
 
-          if (typeof category !== "string" || !VALID_CATEGORIES.has(category.toLowerCase())) {
-               return reply.code(400).send({ error: `Category must be one of: ${Array.from(VALID_CATEGORIES).join(", ")}` });
+          if (
+               typeof category !== "string" ||
+               !VALID_CATEGORIES.has(category.toLowerCase())
+          ) {
+               return reply.code(400).send({
+                    error: `Category must be one of: ${Array.from(VALID_CATEGORIES).join(", ")}`,
+               });
           }
 
           if (typeof description !== "string") {
-               return reply.code(400).send({ error: "Description must be a string" });
+               return reply
+                    .code(400)
+                    .send({ error: "Description must be a string" });
           }
 
           const priceNumber = Number(price);
@@ -78,10 +116,16 @@ export default async function({db, ci, request, reply}) {
           try {
                deliveryUnitContent = JSON.parse(deliveryUnit);
           } catch {
-               return reply.code(400).send({ error: "deliveryUnit must be valid JSON" });
+               return reply
+                    .code(400)
+                    .send({ error: "deliveryUnit must be valid JSON" });
           }
 
-          if (!["instant", "minutes", "hours"].includes(deliveryUnitContent?.type)) {
+          if (
+               !["instant", "minutes", "hours"].includes(
+                    deliveryUnitContent?.type,
+               )
+          ) {
                return reply.code(400).send({ error: "Delivery unit error" });
           }
 
@@ -91,21 +135,33 @@ export default async function({db, ci, request, reply}) {
                try {
                     accountsParsed = JSON.parse(accounts);
                } catch {
-                    return reply.code(400).send({ error: "accounts must be valid JSON" });
+                    return reply
+                         .code(400)
+                         .send({ error: "accounts must be valid JSON" });
                }
 
-               if (!Array.isArray(accountsParsed) || accountsParsed.length === 0) {
-                    return reply.code(400).send({ error: "Accounts must be a non-empty array" });
+               if (
+                    !Array.isArray(accountsParsed) ||
+                    accountsParsed.length === 0
+               ) {
+                    return reply
+                         .code(400)
+                         .send({ error: "Accounts must be a non-empty array" });
                }
           }
 
           if (category.toLowerCase() === "service") {
                if (typeof service !== "string" || service.length < 20) {
-                    return reply.code(400).send({ error: "Service must be a text and need have lees of 20 characters" });
+                    return reply.code(400).send({
+                         error: "Service must be a text and need have lees of 20 characters",
+                    });
                }
           }
-          
-          const quantity = (Array.isArray(accountsParsed) && accountsParsed.length > 0) ? accountsParsed.length : 1;
+
+          const quantity =
+               Array.isArray(accountsParsed) && accountsParsed.length > 0
+                    ? accountsParsed.length
+                    : 1;
 
           const product_id = randomUUID();
           let imageUrl = null;
@@ -114,12 +170,15 @@ export default async function({db, ci, request, reply}) {
           try {
                const uploadToCloudinary = (buffer, options) =>
                     new Promise((resolve, reject) => {
-                    const up = ci.v2.uploader.upload_stream(options, (err, result) => {
-                         if (err) reject(err);
-                         else resolve(result);
+                         const up = ci.uploader.upload_stream(
+                              options,
+                              (err, result) => {
+                                   if (err) reject(err);
+                                   else resolve(result);
+                              },
+                         );
+                         up.end(buffer);
                     });
-                    up.end(buffer);
-               });
 
                const imageRes = await uploadToCloudinary(image.buffer, {
                     folder: "images",
@@ -128,7 +187,10 @@ export default async function({db, ci, request, reply}) {
                });
 
                imageUrl = imageRes?.secure_url || imageRes?.url || null;
-               if (!imageUrl) return reply.code(500).send({ error: "Cloudinary image upload failed" });
+               if (!imageUrl)
+                    return reply
+                         .code(500)
+                         .send({ error: "Cloudinary image upload failed" });
 
                if (asset && category.toLowerCase() === "others") {
                     const assetRes = await uploadToCloudinary(asset.file, {
@@ -138,10 +200,16 @@ export default async function({db, ci, request, reply}) {
                     });
 
                     assetUrl = assetRes?.secure_url || assetRes?.url || null;
-                    if (!assetUrl) return reply.code(500).send({ error: "Cloudinary asset upload failed" });
+                    if (!assetUrl)
+                         return reply.code(500).send({
+                              error: "Cloudinary asset upload failed",
+                         });
                }
           } catch (e) {
-               return reply.code(500).send({ error: "Cloudinary upload failed", details: e?.message });
+               return reply.code(500).send({
+                    error: "Cloudinary upload failed",
+                    details: e?.message,
+               });
           }
 
           const insertProduct = `
@@ -173,7 +241,9 @@ export default async function({db, ci, request, reply}) {
                for (const account of accountsParsed) {
                     const info = account?.content;
                     if (typeof info !== "string" || info.length === 0) {
-                         return reply.code(400).send({ error: "Each account must have content" });
+                         return reply.code(400).send({
+                              error: "Each account must have content",
+                         });
                     }
 
                     await db(insertAccounts, [
@@ -236,6 +306,8 @@ export default async function({db, ci, request, reply}) {
                },
           });
      } catch (e) {
-          return reply.code(500).send({ error: `Server error, ${e?.message || e}` });
+          return reply
+               .code(500)
+               .send({ error: `Server error, ${e?.message || e}` });
      }
 }

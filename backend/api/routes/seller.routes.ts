@@ -1,6 +1,6 @@
-// routes/seller.routes.js
+// routes/seller.routes.ts
 import gestionProduct from "./controllers/seller/index.js";
-import gestionFeedback from "./controllers/feedback/index.js";
+import gestionFeedback from "./controllers/feedback/index.ts";
 import authMiddleware from "../middleware/verify_session.ts";
 import type { DB } from "../types/db.type.ts";
 import type { Filter } from "../types/config_types/filter.type.ts";

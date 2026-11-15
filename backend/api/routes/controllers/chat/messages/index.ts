@@ -1,5 +1,5 @@
 import readRoomController from "./controllers/readRoom.controller.ts";
-import postChatController from "./controllers/postChat.controller.js";
+import postChatController from "./controllers/postChat.controller.ts";
 import getUnreadController from "./controllers/get_unread.controller.ts";
 import type { DB } from "../../../../types/db.type.ts";
 import type { FastifyReply, FastifyRequest } from "fastify";

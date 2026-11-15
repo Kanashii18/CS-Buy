@@ -1,4 +1,4 @@
-import { userController } from "./controllers/user/index.js";
+import userController from "./controllers/user/index.js";
 import authMiddleware from "../middleware/verify_session.ts";
 import type { FastifyInstance } from "fastify";
 import type { DB } from "../types/db.type.ts";

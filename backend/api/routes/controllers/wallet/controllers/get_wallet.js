@@ -1,27 +1,23 @@
-export default async function getWallet(db, request, reply) {
-     const token = request.cookies.session_token;
-     if (!token) {
+export default async function getWallet({ db, request, reply }) {
+     // Bug fix: use request.userInfo (set by verify_session middleware),
+     // NOT request.userId which never exists.
+     const userInfo = request.userInfo;
+     if (!userInfo) {
           return reply.status(401).send({ error: 'Unauthenticated' });
-     }
-     // Extract user_id from jwt token
-     const userId = request.userId;
-     if (!userId) {
-          return reply.status(404).send("Unauthorized");
      }
 
      try {
-          // Usar el pool de conexiones para hacer la consulta
           const query = 'SELECT * FROM Wallets WHERE user_id = ?';
-          const results = await db(query, [userId.id]);
+          const results = await db(query, [userInfo.id]);
 
           if (results.length === 0) {
-               return reply.status(404).send({ error: 'wallet not found' });
+               return reply.status(404).send({ error: 'Wallet not found' });
           }
 
-          return reply.send(results[0]); // `results[0]` contiene el primer (y único) resultado
+          return reply.send(results[0]);
 
      } catch (error) {
-          console.error('Unexpected error:', error);
+          console.error('Unexpected error in getWallet:', error);
           return reply.status(500).send({ error: 'Unknown Error' });
      }
 }

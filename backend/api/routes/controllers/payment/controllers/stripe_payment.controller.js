@@ -1,14 +1,16 @@
-import { stripe as defaultStripe } from './_common.js';
+import { stripe as defaultStripe } from "./_common.js";
 
 export default async function stripe_payment({ request, reply }) {
      const product = request.product;
      const userInfo = request.userInfo;
      const { payment_method } = request.body;
 
-     if (!payment_method) return reply.code(400).send({ error: 'Payment method is required.' });
+     if (!payment_method)
+          return reply.code(400).send({ error: "Payment method is required." });
 
      const priceUSD = Number(product.price);
-     if (!Number.isFinite(priceUSD) || priceUSD <= 0) return reply.code(400).send({ error: 'Invalid product price.' });
+     if (!Number.isFinite(priceUSD) || priceUSD <= 0)
+          return reply.code(400).send({ error: "Invalid product price." });
 
      const amountInCents = Math.round(priceUSD * 100);
 
@@ -17,13 +19,15 @@ export default async function stripe_payment({ request, reply }) {
 
           const paymentIntent = await paymentStripe.paymentIntents.create({
                amount: amountInCents,
-               currency: 'usd',
+               currency: "usd",
                payment_method,
-               confirmation_method: 'automatic',
-               capture_method: 'manual',
+               confirmation_method: "automatic",
+               capture_method: "manual",
                confirm: true,
-               payment_method_types: ['card'],
-               payment_method_options: { card: { request_three_d_secure: 'any' } },
+               payment_method_types: ["card"],
+               payment_method_options: {
+                    card: { request_three_d_secure: "any" },
+               },
                metadata: {
                     product_id: product.product_id,
                     user_id: userInfo.id,
@@ -31,11 +35,25 @@ export default async function stripe_payment({ request, reply }) {
                },
           });
 
-          if (paymentIntent.status === 'requires_capture' || paymentIntent.status === 'requires_action') {
-               return reply.code(200).send({ id: paymentIntent.client_secret, status: paymentIntent.status, payment_id: paymentIntent.id });
+          if (
+               paymentIntent.status === "requires_capture" ||
+               paymentIntent.status === "requires_action"
+          ) {
+               return reply
+                    .code(200)
+                    .send({
+                         id: paymentIntent.client_secret,
+                         status: paymentIntent.status,
+                         payment_id: paymentIntent.id,
+                    });
           }
 
-          return reply.code(400).send({ error: 'Pago fallido o incompleto.', status: paymentIntent.status });
+          return reply
+               .code(400)
+               .send({
+                    error: "Pago fallido o incompleto.",
+                    status: paymentIntent.status,
+               });
      } catch (error) {
           console.error(error);
           return reply.code(500).send({ error });
