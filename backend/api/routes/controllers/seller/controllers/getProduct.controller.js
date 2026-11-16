@@ -44,7 +44,7 @@ export default async function getProduct({ db, request, reply }) {
 
           return reply.code(200).send(products);
      } catch (error) {
-          console.error("\n\n\n\nError getting products:", error, "\n\n\n\n");
+          console.log("\n\n\n\nError getting products:", error, "\n\n\n\n");
           return reply
                .code(500)
                .send({ error: `Error getting products : ${error.message}` });
