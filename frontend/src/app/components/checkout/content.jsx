@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 import Method from "./method";
 import Details from "./details";
@@ -16,13 +16,14 @@ const containerVariants = {
 
 const itemVariants = {
      hidden: { opacity: 0, x: 50 }, // empieza desplazado a la derecha y oculto
-     visible: { opacity: 1, x: 0 },  // aparece en posición
+     visible: { opacity: 1, x: 0 }, // aparece en posición
 };
 
-export default function Content(product_){
+export default function Content(product_) {
      const product = product_.product;
+     console.log("el producto es:", product);
      return (
-          <>   
+          <>
                <motion.main
                     className="mt-32 h-[82.3vh] grid flex-1 overflow-auto justify-center gap-4 grid-cols-[1.1fr_.9fr] max-[66.2rem]:grid-cols-1 max-[66.2rem]:auto-rows-fr max-[66.2rem]:content-center max-[35.2rem]:grid-cols-1 max-[35.2rem]:auto-rows-fr max-[35.2rem]:content-center"
                     variants={containerVariants}
@@ -45,5 +46,4 @@ export default function Content(product_){
                </motion.main>
           </>
      );
-
 }

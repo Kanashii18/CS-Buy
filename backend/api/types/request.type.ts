@@ -7,6 +7,9 @@ export interface IdQuery {
 export interface IdBody {
      id: UUID;
 }
+export interface UserIdBody {
+     user_id: UUID;
+}
 
 export type UploadRequest = FastifyRequest & {
      file?: Express.Multer.File;
