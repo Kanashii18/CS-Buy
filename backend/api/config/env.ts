@@ -22,7 +22,7 @@ if (DEV_MODE !== "production" && DEV_MODE !== "testing")
           `Invalid DEV value, expect "production" or "testing"` as Dev_Mode,
      );
 
-const Dev: boolean = DEV_MODE === ("production" as Dev_Mode) ? true : false;
+const Dev: boolean = DEV_MODE !== ("production" as Dev_Mode) ? true : false;
 if (typeof Dev !== "boolean") set_error("DEV_MODE", "Invalid type value");
 
 // SECRET_KEY
