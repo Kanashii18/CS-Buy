@@ -30,9 +30,6 @@ export default async function({db, request, reply} : Checkout.Params<product_id>
                `,
                [userInfo.id, id_session]
           );
-          if(res.affectedRows === 0) {
-               return await reply.code(500).send({ error: 'Failed to clean up old sessions' });
-          }
 
           return await reply.send({ session_id: id_session });
      } catch {

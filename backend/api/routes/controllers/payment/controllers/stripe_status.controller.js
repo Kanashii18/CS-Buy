@@ -1,84 +1,44 @@
-import { randomUUID, Set_orders, stripe as defaultStripe } from "./_common.js";
+import { randomUUID, Set_orders, stripe } from "./_common.js";
+import { transaction } from "../../../../scripts/transaction.ts";
+import { matchesCheckout } from "./wallet-intent.js";
 
-export default async function stripe_status({ db, io, users, request, reply }) {
-     const userInfo = request.userInfo;
-     const product = request.product;
-     const { paymentIntentId } = request.body;
-
-     if (!paymentIntentId)
-          return reply
-               .code(400)
-               .send({ error: "Payment intent id is required." });
-
+export default async function stripeStatus({ db, io, users, request, reply }) {
+     const { product, userInfo } = request;
+     const id = request.body?.paymentIntentId;
+     if (typeof id !== "string" || !id.startsWith("pi_"))
+          return reply.code(400).send({ error: "Invalid payment intent." });
      try {
-          const paymentStripe = defaultStripe;
-          const paymentIntent_response =
-               await paymentStripe.paymentIntents.retrieve(paymentIntentId);
-
-          if (paymentIntent_response.status !== "requires_capture") {
-               return reply
-                    .code(400)
-                    .send({ error: "Pago fallido o incompleto." });
+          const intent = await stripe.paymentIntents.retrieve(id);
+          if (!matchesCheckout(intent, request))
+               return reply.code(409).send({ error: "Authorization does not match checkout." });
+          const createOrder = { Account: Set_orders.account, Service: Set_orders.service }[product.category];
+          if (!createOrder) return reply.code(400).send({ error: "Unsupported listing." });
+          const result = await transaction(async (tx) => {
+               // Serialize fulfillment against competing buyers and repeated confirmations.
+               const [listing] = await tx("SELECT price, quantity, deleted FROM Products WHERE product_id = ? FOR UPDATE", [product.product_id]);
+               const [paid] = await tx("SELECT order_id FROM Payments WHERE payment_id = ?", [id]);
+               if (paid) return { orderId: paid.order_id, created: false };
+               if (!listing || listing.deleted || listing.quantity <= 0 ||
+                    Number(listing.price) !== Number(product.price)) return null;
+               const orderId = randomUUID();
+               const credit = await tx("UPDATE Wallets SET pending = pending + ? WHERE user_id = ?", [product.price, product.user_id]);
+               if (credit.affectedRows !== 1) throw new Error("Seller wallet unavailable");
+               await createOrder(reply, tx, product, userInfo, orderId);
+               await tx(`INSERT INTO Payments (payment_processed, payment_id, order_id, user_id,
+                    payment_gateway, payment_gateway_id, amount, status, wallet_id, method)
+                    VALUES (1, ?, ?, ?, 'stripe', ?, ?, 'requires_capture',
+                    (SELECT wallet_id FROM Wallets WHERE user_id = ?), ?)`,
+                    [id, orderId, userInfo.id, randomUUID(), product.price, product.user_id,
+                         intent.metadata.method === "google_pay" ? "google_pay" : "card"]);
+               return { orderId, created: true };
+          });
+          if (!result) return reply.code(409).send({ error: "Listing no longer available." });
+          if (result.created) {
+               try { await Set_orders.final(reply, db, product, userInfo, io, users); }
+               catch { request.log.warn("Order saved; notification failed"); }
           }
-
-          const security_q = `SELECT payment_processed FROM Payments WHERE payment_id = ?`;
-          const response = await db(security_q, [paymentIntent_response.id]);
-
-          if (response.length === 1 && response[0].payment_processed === 1) {
-               return reply.code(401).send({ error: "invalid payment id" });
-          }
-
-          let buy_option;
-          if (product.category === "Service") buy_option = Set_orders.service;
-          else if (product.category === "Account")
-               buy_option = Set_orders.account;
-          else return reply.code(400).send("invalid option");
-
-          const update_wallet = `UPDATE Wallets SET pending = pending + ? WHERE user_id = ?;`;
-          await db(update_wallet, [product.price, product.user_id]);
-
-          const order_id = randomUUID();
-
-          await buy_option(reply, db, product, userInfo, order_id);
-
-          Set_orders.final(reply, db, product, userInfo, io, users);
-
-          const security_u = `
-               INSERT INTO Payments (
-                    payment_processed, 
-                    payment_id, 
-                    order_id, 
-                    user_id,
-                    payment_gateway, 
-                    payment_gateway_id, 
-                    amount,
-                    status,
-                    wallet_id
-               )
-               VALUES (
-                    1, ?, ?, ?, ?, ?, ?, ?, 
-                    (SELECT wallet_id FROM Wallets WHERE user_id = ?)
-               );
-          `;
-
-          const gateway_id = randomUUID();
-
-          await db(security_u, [
-               paymentIntent_response.id,
-               order_id,
-               userInfo.id,
-               "stripe",
-               gateway_id,
-               product.price,
-               "requires_capture",
-               product.user_id,
-          ]);
-
-          return reply.code(200).send("OK");
-     } catch (error) {
-          console.error("Error al verificar el pago:", error);
-          return reply
-               .code(500)
-               .send({ error: "Error en el servidor al verificar el pago." });
+          return reply.send({ orderId: result.orderId });
+     } catch {
+          return reply.code(500).send({ error: "Could not verify payment. Retry order confirmation." });
      }
 }
