@@ -2,11 +2,13 @@ import Error_windows from "./payments/error";
 
 import { useState, useEffect } from "react";
 import Head_stripe from "./payments/stripe";
+import GPayButton from "./payments/GPayButton";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 const loaderSvg = "../assets/icons/loader/payment_loader.svg";
 
 const stripePromise = loadStripe(
+     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
      "pk_test_51TyPYkJgS4YGMywNMcoK4qR5CBijxqv72QStEJmkQs48kPIgmoMlhWcWvqRCIUQcYxR0jOi4y0edJjJ1IHmLAoXG009BWeG1c5",
 );
 
@@ -208,6 +210,16 @@ export default function Method({ product }) {
                                    />
                               </Elements>
                          </div>
+
+                         {process.env.NEXT_PUBLIC_GOOGLE_PAY_ENABLED === "true" &&
+                              ["Service", "Account"].includes(product.category) && <>
+                              <button type="button" aria-expanded={visiblePaymentMethod === "gpay"}
+                                   onClick={() => toggleVisibility("gpay")}
+                                   className="w-full rounded-[5.5px] bg-[rgb(66,38,83)] px-8 py-4 text-left font-bold text-white hover:bg-[#483557]">
+                                   Google Pay
+                              </button>
+                              {visiblePaymentMethod === "gpay" && <GPayButton stripePromise={stripePromise} product={product} />}
+                         </>}
 
                          <div
                               className="bg-[rgb(66,38,83)] transition-colors duration-300 ease-in-out w-full h-[3.54875rem] rounded-[5.5px] pt-[0.9rem] pr-8 pb-[0.9rem] pl-8 text-center break-words flex justify-between items-center cursor-pointer hover:bg-[#483557]"

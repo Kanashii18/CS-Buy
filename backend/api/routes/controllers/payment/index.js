@@ -6,7 +6,7 @@ import stripeStatus from "./controllers/stripe_status.controller.js";
 
 export default function paymentController({ db, io, users }) {
      return {
-          gpay_payment: (request, reply) => gpayPayment({ request, reply }),
+          gpay_payment: (request, reply) => gpayPayment({ db, request, reply }),
           crypto_payment: (request, reply) => cryptoPayment({ reply }),
           paypal_payment: (request, reply) => paypalPayment({ request, reply }),
           stripe_payment: (request, reply) => stripePayment({ request, reply }),
