@@ -1,11 +1,15 @@
-import type { ChatParams, ResponseDB } from '../../../../../types/chat/overview.type.ts';
+import type {
+     ChatParams,
+     ResponseDB,
+} from "../../../../../types/chat/overview.type.ts";
 
-export default async ({ db, request, reply }: ChatParams ) => {
+export default async ({ db, request, reply }: ChatParams) => {
      const userInfo = request.userInfo;
 
      try {
           // Query to get the chat overview for the user
-          const result = await db<ResponseDB[]>(`
+          const result = await db<ResponseDB[]>(
+               `
                SELECT
                     id,
                     user_id,
@@ -19,22 +23,25 @@ export default async ({ db, request, reply }: ChatParams ) => {
                END AS unread_count
                FROM chat_user_room_status
                WHERE user_id = ? OR other_id = ?
-          `, [userInfo.id, userInfo.id, userInfo.id, userInfo.id]);
-               
-          const modifiedResult = result.map(item => {
+          `,
+               [userInfo.id, userInfo.id, userInfo.id, userInfo.id],
+          );
+
+          const modifiedResult = result.map((item) => {
                if (item.other_id === userInfo.id) {
+                    console.log("Modifying item:", item);
                     return {
                          ...item,
                          user_id: userInfo.id,
                          other_id: item.user_id,
                     };
                }
-               return item; 
+               return item;
           });
-
+          console.log;
           return await reply.send(modifiedResult);
      } catch (err) {
           console.error(err);
-          return await reply.code(500).send({ error: 'Server Error' });
+          return await reply.code(500).send({ error: "Server Error" });
      }
-}
+};

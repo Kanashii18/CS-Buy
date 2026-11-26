@@ -53,10 +53,11 @@ const fastify: FastifyInstance = Fastify({
 
      // Catch-all route for SPA
      fastify.all("/*", async (req, reply) => {
-          if (req.raw.url?.startsWith("/api")) return reply.callNotFound();
-
-          await handle(req.raw, reply.raw);
+          if (req.raw.url?.startsWith("/api")) {
+               return reply.callNotFound();
+          }
           reply.hijack();
+          await handle(req.raw, reply.raw);
      });
 
      // =====================|| Set Server ||===================== //

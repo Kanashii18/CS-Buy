@@ -8,7 +8,7 @@
      },
      "scripts": {
           "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js backend/**/* --runInBand --verbose",
-          "a": "node ./backend/api/api.ts",
+          "a": "tsx ./backend/api/api.ts",
           "api": "node --watch ./backend/api/api.ts",
           "build": "next build frontend",
           "start": "next start frontend"
@@ -51,6 +51,7 @@
           "sqlite3": "^5.1.7",
           "stripe": "^18.4.0",
           "tiny-secp256k1": "^2.2.4",
+          "tsx": "^4.23.15",
           "winston": "^3.19.0"
      },
      "devDependencies": {

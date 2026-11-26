@@ -7,13 +7,13 @@ export default async function isBanned(db : DB, { userId = "", deviceId = "", ip
           `SELECT 1
                FROM Bans
                WHERE (
-                    (subject_type='user_id'   AND subject_value=?)
-                    AND (subject_type='device' AND subject_value=?)
-                    AND (subject_type='ip'     AND subject_value=?)
-                    )
+                    (user_id = ? AND user_id IS NOT NULL)
+                    OR (deviceId = ? AND deviceId IS NOT NULL)
+                    OR (ip = ? AND ip IS NOT NULL)
+               )
                AND (expires_at IS NULL OR expires_at > NOW())
                LIMIT 1`,
-          [userId, deviceId, ip]
+          [userId || null, deviceId || null, ip || null]
      );
      if(!Array.isArray(rows)){
           throw new Error("Invalid database response");

@@ -21,15 +21,23 @@ export default async ({ db, request, reply }) => {
 
      const isEmail = email.includes("@");
 
-     isEmail
-          ? (() => {
-                 let error = conditional.email_conditional(email);
-                 if (error) return reply.code(400).send({ error });
-            })()
-          : (() => {
-                 let error = conditional.username_conditional(email);
-                 if (error) return reply.code(400).send({ error });
-            })();
+     const validationResult = await Promise.resolve()
+          .then(() => {
+               const error = isEmail
+                    ? conditional.email_conditional(email)
+                    : conditional.username_conditional(email);
+
+               if (error) throw new Error(String(error));
+          })
+          .catch((err) => {
+               console.error("Validation error:", err);
+
+               return reply.code(400).send({
+                    error: "Invalid email or username.",
+               });
+          });
+     // if reply was already sent, finish the function
+     if (reply.sent) return validationResult;
 
      let error = conditional.password_conditional(password);
      if (error) return reply.code(400).send({ error });

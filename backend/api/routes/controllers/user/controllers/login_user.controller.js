@@ -1,5 +1,9 @@
 import ban_controller from "../../../../modules/auth/ban/index.ts";
 import conditional from "../../../../modules/user_functions/conditional.ts";
+import isBanned from "../../../../modules/user_functions/is_banned.ts";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { SECRET_PEPPER } from "../../../../config/bcrypt.ts";
 
 // =============== Login User =============== //
 /**
@@ -67,7 +71,7 @@ export default async ({ db, request, reply }) => {
           }
 
           //linkeamos ip y deviceid al usuario
-          await ban_controller.linking(db, user.user_id, deviceId, ip);
+          await ban_controller().linking(deviceId, user.user_id, ip);
 
           const payload = {
                id: user.user_id,

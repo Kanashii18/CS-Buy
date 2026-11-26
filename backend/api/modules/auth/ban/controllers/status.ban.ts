@@ -6,9 +6,11 @@ export default async ({ db, user_id, device_id, ip }: Ban.StatusParams) => {
           if (!user_id) return { error: "Unauthorized" };
           const rows = await db<QueryResult[]>(
                `SELECT 1 FROM Bans
-                    WHERE (subject_type='user'   AND subject_value = ?)
-                    AND (subject_type='device' AND subject_value = ?)
-                    OR (subject_type='ip'     AND subject_value = ?)
+                    WHERE (
+                         (user_id = ? AND user_id IS NOT NULL)
+                         OR (deviceId = ? AND deviceId IS NOT NULL)
+                         OR (ip = ? AND ip IS NOT NULL)
+                    )
                     AND (expires_at IS NULL OR expires_at > NOW())
                     LIMIT 1`,
                [user_id, device_id, ip],
