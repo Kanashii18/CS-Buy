@@ -9,7 +9,7 @@ const loaderSvg = "../assets/icons/loader/payment_loader.svg";
 
 const stripePromise = loadStripe(
      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
-     "pk_test_51TyPYkJgS4YGMywNMcoK4qR5CBijxqv72QStEJmkQs48kPIgmoMlhWcWvqRCIUQcYxR0jOi4y0edJjJ1IHmLAoXG009BWeG1c5",
+          "pk_live_51UgL09F1pGr1Iy8oTdSTohFUGetWfatIDgMu6Qaj9PbbgPTd4966umog8wzaQyCO29IRt0kfF3TMafOFvOrVorXq00Z0iZt7rb",
 );
 
 export default function Method({ product }) {
@@ -211,15 +211,41 @@ export default function Method({ product }) {
                               </Elements>
                          </div>
 
-                         {process.env.NEXT_PUBLIC_GOOGLE_PAY_ENABLED === "true" &&
-                              ["Service", "Account"].includes(product.category) && <>
-                              <button type="button" aria-expanded={visiblePaymentMethod === "gpay"}
-                                   onClick={() => toggleVisibility("gpay")}
-                                   className="w-full rounded-[5.5px] bg-[rgb(66,38,83)] px-8 py-4 text-left font-bold text-white hover:bg-[#483557]">
-                                   Google Pay
-                              </button>
-                              {visiblePaymentMethod === "gpay" && <GPayButton stripePromise={stripePromise} product={product} />}
-                         </>}
+                         {process.env.NEXT_PUBLIC_GOOGLE_PAY_ENABLED !==
+                              "false" &&
+                              ["Service", "Account"].includes(
+                                   product.category,
+                              ) && (
+                                   <>
+                                        <button
+                                             type="button"
+                                             aria-expanded={
+                                                  visiblePaymentMethod ===
+                                                  "gpay"
+                                             }
+                                             onClick={() =>
+                                                  toggleVisibility("gpay")
+                                             }
+                                             className="bg-[rgb(66,38,83)] transition-colors duration-300 ease-in-out w-full h-[3.54875rem] rounded-[5.5px] pt-[0.9rem] pr-8 pb-[0.9rem] pl-8 text-center break-words flex justify-between items-center cursor-pointer hover:bg-[#483557]"
+                                        >
+                                             <span className="m-0 text-[16px] font-bold whitespace-normal break-normal [overflow-wrap:normal] text-[#f3f3f3f5] tracking-[0.07rem]">
+                                                  Google Pay
+                                             </span>
+                                             <span
+                                                  aria-hidden="true"
+                                                  className="flex h-[1.75rem] w-[2.625rem] items-center justify-center rounded-[4px] bg-white text-[12px] font-bold text-[#3c4043]"
+                                             >
+                                                  GPay
+                                             </span>
+                                        </button>
+                                        {visiblePaymentMethod === "gpay" && (
+                                             <GPayButton
+                                                  stripePromise={stripePromise}
+                                                  product={product}
+                                             />
+                                        )}
+                                   </>
+                              )}
 
                          <div
                               className="bg-[rgb(66,38,83)] transition-colors duration-300 ease-in-out w-full h-[3.54875rem] rounded-[5.5px] pt-[0.9rem] pr-8 pb-[0.9rem] pl-8 text-center break-words flex justify-between items-center cursor-pointer hover:bg-[#483557]"

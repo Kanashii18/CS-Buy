@@ -18,7 +18,20 @@ function Wallet({ session, amount }) {
      const [message, setMessage] = useState("Checking Google Pay availability…");
      const [pending, setPending] = useState(null);
      const key = `gpay:authorized:${session}`;
-     useEffect(() => { setPending(sessionStorage.getItem(key)); }, [key]);
+     useEffect(() => {
+          const prior = sessionStorage.getItem(key);
+          setPending(prior);
+          if (prior) setMessage("Payment authorized. Confirm the order to finish.");
+     }, [key]);
+     // Stripe emits neither ready nor loaderror if Stripe.js or Elements fails to initialize.
+     const [settled, setSettled] = useState(false);
+     useEffect(() => {
+          if (settled) return;
+          const timer = setTimeout(() => setMessage((current) =>
+               current === "Checking Google Pay availability…"
+                    ? "Google Pay could not load. Disable blockers or choose another payment method." : current), 10000);
+          return () => clearTimeout(timer);
+     }, [settled]);
 
      async function finish(id) {
           await post("stripe/payment-status", session, { paymentIntentId: id });
@@ -61,8 +74,8 @@ function Wallet({ session, amount }) {
      return <div>
           {!pending && <ExpressCheckoutElement options={{
                paymentMethods: { googlePay: "auto", applePay: "never", link: "never", paypal: "never", amazonPay: "never", klarna: "never" },
-          }} onReady={({ availablePaymentMethods }) => setMessage(availablePaymentMethods?.googlePay ? "" : "Google Pay unavailable here. Choose another payment method.")}
-             onLoadError={() => setMessage("Google Pay could not load. Choose another payment method.")}
+          }} onReady={({ availablePaymentMethods }) => { setSettled(true); setMessage(availablePaymentMethods?.googlePay ? "" : "Google Pay unavailable here. Choose another payment method."); }}
+             onLoadError={() => { setSettled(true); setMessage("Google Pay could not load. Choose another payment method."); }}
              onConfirm={confirm} onCancel={() => setMessage("Payment canceled.")} />}
           {pending && <button type="button" className="text-white underline" onClick={async () => {
                if (busy.current) return;
@@ -80,7 +93,7 @@ export default function GPayButton({ stripePromise, product }) {
      if (!session || !Number.isSafeInteger(amount) || amount < 50 || amount > 99999999)
           return <p role="status">Google Pay unavailable for this listing.</p>;
      return <Elements key={`${session}:${amount}`} stripe={stripePromise}
-          options={{ mode: "payment", amount, currency: "usd", captureMethod: "manual", paymentMethodTypes: ["card"] }}>
+          options={{ mode: "payment", amount, currency: "usd", captureMethod: "manual", allowedPaymentMethodTypes: ["card"] }}>
           <Wallet session={session} amount={amount} />
      </Elements>;
 }

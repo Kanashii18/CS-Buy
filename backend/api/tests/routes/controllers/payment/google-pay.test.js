@@ -7,7 +7,7 @@ const request = { userInfo: { id: "buyer" }, query: { session_id: "checkout" },
      product: { product_id: "listing", user_id: "seller", price: "21.99", category: "Account" },
      body: { product: { price: 0.01 } } };
 const originalFlag = process.env.GOOGLE_PAY_ENABLED;
-beforeEach(() => { jest.clearAllMocks(); process.env.GOOGLE_PAY_ENABLED = "true"; });
+beforeEach(() => { jest.clearAllMocks(); delete process.env.GOOGLE_PAY_ENABLED; });
 afterAll(() => {
      if (originalFlag === undefined) delete process.env.GOOGLE_PAY_ENABLED;
      else process.env.GOOGLE_PAY_ENABLED = originalFlag;
@@ -30,7 +30,7 @@ test("expired checkout never calls processor", async () => {
      expect(create).not.toHaveBeenCalled();
 });
 test("disabled endpoint never calls processor", async () => {
-     delete process.env.GOOGLE_PAY_ENABLED;
+     process.env.GOOGLE_PAY_ENABLED = "false";
      const res = reply();
      await prepare({ request, reply: res });
      expect(res.code).toHaveBeenCalledWith(404);

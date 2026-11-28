@@ -2,7 +2,7 @@ import { stripe } from "./_common.js";
 import { walletIntent } from "./wallet-intent.js";
 
 export default async function gpayPayment({ db, request, reply }) {
-     if (process.env.GOOGLE_PAY_ENABLED !== "true")
+     if (process.env.GOOGLE_PAY_ENABLED === "false")
           return reply.code(404).send({ error: "Google Pay disabled." });
      const params = walletIntent(request);
      if (!params) return reply.code(400).send({ error: "Listing unavailable for Google Pay." });

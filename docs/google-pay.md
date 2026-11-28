@@ -2,9 +2,9 @@
 
 The Next.js checkout uses Stripe Express Checkout Element for eligible Google Pay wallets. Fastify authenticates the buyer, resolves the listing from the checkout session, and creates a USD card PaymentIntent using the database price. Stripe authorizes without capturing. The status route independently retrieves the authorization and checks the buyer, seller, product, session and amount before recording the order and seller's pending funds in one MySQL transaction. Delivery confirmation captures the same Stripe intent and settles the seller wallet.
 
-## Enable in staging
+## Configuration
 
-Set `NEXT_PUBLIC_GOOGLE_PAY_ENABLED=true` and `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` before building the frontend. Set `GOOGLE_PAY_ENABLED=true` and the corresponding `STRIPE_SECRET_KEY` in the backend environment. Use matching test keys, HTTPS and a registered test payment-method domain. Keep both flags off for production until acceptance testing is complete. See [Stripe's Express Checkout guide](https://docs.stripe.com/elements/express-checkout-element/accept-a-payment).
+Google Pay is listed by default for Account and Service listings. To turn it off, set `NEXT_PUBLIC_GOOGLE_PAY_ENABLED=false` in the frontend environment (`frontend/.env.local`, read at build time) and `GOOGLE_PAY_ENABLED=false` in the backend environment. `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` overrides the built-in test publishable key and must match the backend `STRIPE_SECRET_KEY` account. The wallet button itself needs HTTPS, a registered payment-method domain and a supported browser; without those the row opens with an "unavailable" message. See [Stripe's Express Checkout guide](https://docs.stripe.com/elements/express-checkout-element/accept-a-payment).
 
 ## Acceptance checks
 
